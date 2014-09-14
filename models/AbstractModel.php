@@ -42,22 +42,30 @@ abstract class AbstractModel{
 	
 	
 	public function save() {
-    
+
+        $columns = static::$cols;
 	    $names = $this->getColumnNames();
 		
 		foreach ($names as $value){
-		$a= $value[0];
-		$b= $value[1];
-		$this->a =$a;
-		$this->b = $b;
-		
+            $data = implode("," , $value);
+        }
+
 	    if ($this->isNew)  {
-		    $sql = "INSERT INTO " . static::$table . ' (' . $a . ','. $b . ")
-			VALUES(:title, :content)";
+
+            foreach ($columns as $value) {
+                $sets[] = ':' . $value;
+                $val[':'.$value] = $this->{$value};
+            }
+            var_dump($val);
+            var_dump($sets);
+
+
+		    $sql = "INSERT INTO " . static::$table . ' (' . $data . ")
+			VALUES(". implode(",", $sets).")";
+            var_dump($sql);
 			$dbh = self::getDbh();
 			$sth = $dbh->prepare($sql);
-		    $sth->execute(array(':title' => $this->title,
-			                    ':content' => $this->content,));
+		    $sth->execute($val);
 			$this->isNew = false;
             $this->id = $dbh->lastInsertId();			
 		}
@@ -73,7 +81,7 @@ abstract class AbstractModel{
 								));	
 		}
 		
-	}
+
 	}
 
 	public function getColumnNames() {
