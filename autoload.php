@@ -9,4 +9,4 @@ function __autoload($class) {
 	                require __DIR__ .'//'. $direct . $class . '.php';
 			}
 	        }
-		}	
+		}

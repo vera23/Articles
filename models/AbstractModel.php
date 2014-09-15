@@ -44,25 +44,16 @@ abstract class AbstractModel{
 	public function save() {
 
         $columns = static::$cols;
-	    $names = $this->getColumnNames();
-		
-		foreach ($names as $value){
-            $data = implode("," , $value);
-        }
+        $names= array();
+        $value= array();
 
 	    if ($this->isNew)  {
-
             foreach ($columns as $value) {
                 $sets[] = ':' . $value;
                 $val[':'.$value] = $this->{$value};
             }
-            var_dump($val);
-            var_dump($sets);
-
-
-		    $sql = "INSERT INTO " . static::$table . ' (' . $data . ")
+		    $sql = "INSERT INTO " . static::$table . ' (' .implode(",", $columns) . ")
 			VALUES(". implode(",", $sets).")";
-            var_dump($sql);
 			$dbh = self::getDbh();
 			$sth = $dbh->prepare($sql);
 		    $sth->execute($val);
@@ -70,9 +61,13 @@ abstract class AbstractModel{
             $this->id = $dbh->lastInsertId();			
 		}
 		else {
-		$sql = "UPDATE " .static::$table . "
-		SET title=:title, content=:content 
-		WHERE id=:id";
+            foreach ($columns as $value) {
+                $sets[] = ':' . $value;
+                $val[':'.$value] = $this->{$value};
+            }
+
+		    $sql = "UPDATE " .static::$table . "
+		    SET " . implode(",", $sets) . " WHERE id=:id";
 			$dbh = self::getDbh();
 			$sth = $dbh->prepare($sql);
 		    $sth->execute(array(':title' => $this->title,
@@ -80,34 +75,8 @@ abstract class AbstractModel{
 								':id' => $this->id,
 								));	
 		}
-		
-
 	}
 
-	public function getColumnNames() {
-	    $this->arr = $arr = array();
-	
-	    $sql = "SHOW COLUMNS FROM ".static::$table;
-	    $dbh = self::getDbh();
-	    $sth = $dbh->prepare($sql);
-	    $sth->execute();
-	    $res= $sth->fetchAll();
-	    foreach($res as $key=>$result) {
-	        foreach ($result as $key2=> $value) {
-		        if($key2 === 'Field'){
-			        if($value !== 'id'){
-				    $arr[]=$value;
-					}
-			    }
-		    }
-	    }
-		$array[] = $arr;
-		$this->array = $array;
-		return $array;
-	}
-	
-	
-	
 	public function delete() {
 	    $sql = "DELETE FROM " .static::$table . " WHERE id=:id";
 		$sth = self::getDbh() ->prepare($sql);

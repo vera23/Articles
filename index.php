@@ -1,7 +1,6 @@
 ﻿<?php
-
+//
 require(__DIR__ . '/autoload.php');
-
 		
 $ctrl = !empty($_GET['ctrl']) ? $_GET['ctrl'] : 'News';
 $action = !empty($_GET['action']) ? $_GET['action'] : 'All';
